@@ -7,7 +7,25 @@ import (
     "os/exec"
 )
 
-func NewParentProcess(tty bool) (*exec.Command, *os.File) {
+var (
+    RUNNING               string = "running"
+    STOP                  string = "stopped"
+    EXIT                  string = "exited"
+    DefaultInfoLocation   string = "/var/run/dockerEngine/%s/"
+    ConfigName            string = "config.json"
+    ContainerLogFile      string = "container.log"
+)
+
+type ContainerInfo struct {
+    pid              string `json:"pid"`
+    Id               string `json:"id"`
+    Name             string `json:"name"`
+    Command          string `json:"command"`
+    CreateTime       string `json:"createTime"`
+    Status           String `json:"status"`
+}
+
+func NewParentProcess(tty bool, containerName string) (*exec.Command, *os.File) {
     //args := []string{"init", command}
     readPipe, writePipe, err := NewPipe()
     if err != nil {
@@ -23,6 +41,19 @@ func NewParentProcess(tty bool) (*exec.Command, *os.File) {
         cmd.Stdin = os.Stdin
         cmd.Stdout = os.Stdout
         cmd.Stderr = os.Stderr
+    }else {
+        dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+        if err := os.MkdirAll(dirURL, 0622); err != nil {
+            log.Errorf("NewParentProcess mkdir %s error %v", dirURL, err)
+            return nil, nil
+        }
+        stdLogFilePath := dirURL + ContainerLogFile
+        stdLogFile, err := os.Create(stdLogFilePath)
+        if err != nil {
+            log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
+            return nil, nil
+        }
+        cmd.Stdout = stdLogFile
     }
     cmd.ExtraFiles = []*os.File{readPipe}
 //    cmd.Dir = "/root/busybox"
