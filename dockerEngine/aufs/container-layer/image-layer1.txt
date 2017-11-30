@@ -1,0 +1,3 @@
+I am image layer 1
+
+write to mnt's image-layer1.txt
