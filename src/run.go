@@ -1,7 +1,7 @@
 package main
 
 import (
-    "../../../../home/vagrant/dockerEngine/src/container"
+    "dockerEngine/src/container"
     "os"
     log "github.com/Sirupsen/logrus"
 )

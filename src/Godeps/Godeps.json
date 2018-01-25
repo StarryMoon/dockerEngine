@@ -1,0 +1,29 @@
+{
+	"ImportPath": "dockerEngine/src",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v1.0.4",
+			"Rev": "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+		},
+		{
+			"ImportPath": "github.com/urfave/cli",
+			"Comment": "v1.20.0-51-g75104e9",
+			"Rev": "75104e932ac2ddb944a6ea19d9f9f26316ff1145"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "4965c41c87caab0b75d0b9e7da17dfeedc9024da"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "d7da511264241fc5fbc39db29ff0e865923ad146"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "d7da511264241fc5fbc39db29ff0e865923ad146"
+		}
+	]
+}

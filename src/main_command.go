@@ -4,7 +4,7 @@ import (
     "fmt"
     log "github.com/Sirupsen/logrus"
     "github.com/urfave/cli"
-    "../../../../home/vagrant/dockerEngine/src/container"
+    "dockerEngine/src/container"
 )
 
 var runCommand = cli.Command{
