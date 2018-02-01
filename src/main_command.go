@@ -34,20 +34,20 @@ var runCommand = cli.Command{
         if len(context.Args()) < 1 {
             return fmt.Errorf("Missing container command")
         }
-        cmd := context.Args().Get(0)
-//        var cmdArray []string
-//        for _, arg := range context.Args() {
-//            cmdArray = append(cmdArray, arg)
-//        }
+//        cmd := context.Args().Get(0)
+        var cmdArray []string
+        for _, arg := range context.Args() {
+            cmdArray = append(cmdArray, arg)
+        }
         fmt.Println("context args Get(0) : ", context.Args().Get(0))
-//        fmt.Println("context args : ", cmdArray)
+        fmt.Println("context args : ", cmdArray)
         tty := context.Bool("ti")
         resConf := &subsystems.ResourceConfig{
             MemoryLimit: context.String("m"),
             CpuSet: context.String("cpuset"),
             CpuShare: context.String("cpushare"),
         }
-        RunCmd(tty, cmd, resConf)
+        RunCmd(tty, cmdArray, resConf)
         return nil
     },
 }
@@ -60,7 +60,7 @@ var initCommand = cli.Command{
         cmd := context.Args().Get(0)
         fmt.Println("init command args : ", cmd)
         log.Infof("command %s", cmd)
-        err := container.RunContainerInitProcess(cmd, nil)
+        err := container.RunContainerInitProcess()
         return err
     }, 
 }
