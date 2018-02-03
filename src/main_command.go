@@ -35,17 +35,25 @@ var runCommand = cli.Command{
             return fmt.Errorf("Missing container command")
         }
 //        cmd := context.Args().Get(0)
+        fmt.Println("context args : ", context.Args())
         var cmdArray []string
         for _, arg := range context.Args() {
             cmdArray = append(cmdArray, arg)
+            fmt.Println("cmdArray : ", cmdArray)
         }
         fmt.Println("context args Get(0) : ", context.Args().Get(0))
         fmt.Println("context args : ", cmdArray)
         tty := context.Bool("ti")
+        memorylimit := context.String("m")
+        cpuset := context.String("cpuset")
+        cpushare := context.String("cpushare")
+        fmt.Println("context args memory: ", memorylimit)
+        fmt.Println("context args cpuset: ", cpuset)
+        fmt.Println("context args cpushare: ", cpushare)
         resConf := &subsystems.ResourceConfig{
-            MemoryLimit: context.String("m"),
-            CpuSet: context.String("cpuset"),
-            CpuShare: context.String("cpushare"),
+            MemoryLimit: memorylimit,
+            CpuSet: cpuset,
+            CpuShare: cpushare,
         }
         RunCmd(tty, cmdArray, resConf)
         return nil
