@@ -34,6 +34,12 @@ func (s *CpuSetSubsystem) Remove(cgroupPath string) error {
 
 func (s *CpuSetSubsystem) Apply(cgroupPath string, pid int) error {
     if subsysCgroupPath, err := GetCgroupPath(s.Name(), cgroupPath, false); err == nil {
+        if err := ioutil.WriteFile(path.Join(subsysCgroupPath, "cpuset.cpus"), []byte(strconv.Itoa(0)), 0644); err != nil {
+            return fmt.Errorf("set cgroup cpuset cpus fail %v", err)
+        }
+        if err := ioutil.WriteFile(path.Join(subsysCgroupPath, "cpuset.mems"), []byte(strconv.Itoa(0)), 0644); err != nil {
+            return fmt.Errorf("set cgroup cpuset mems fail %v", err)
+        }
         if err := ioutil.WriteFile(path.Join(subsysCgroupPath, "tasks"), []byte(strconv.Itoa(pid)), 0644); err != nil {
             return fmt.Errorf("set cgroup proc fail %v", err)
         }
