@@ -5,7 +5,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/urfave/cli"
     "dockerEngine/src/container"
-    "dockerEngine/src/cgroups/subsystems"
+//    "dockerEngine/src/cgroups/subsystems"
 //    "dockerEngine/src/cgroups"
 )
 
@@ -17,7 +17,7 @@ var runCommand = cli.Command{
             Name: "ti",
             Usage: "enable tty",
         },
-        cli.StringFlag{
+/*        cli.StringFlag{
             Name: "m",
             Usage: "memory limit",
         },
@@ -29,6 +29,7 @@ var runCommand = cli.Command{
             Name: "cpuset",
             Usage: "cpuset limit",
         },
+*/        
     },
     Action: func(context *cli.Context) error {
         if len(context.Args()) < 1 {
@@ -44,7 +45,7 @@ var runCommand = cli.Command{
         fmt.Println("context args Get(0) : ", context.Args().Get(0))
         fmt.Println("context args : ", cmdArray)
         tty := context.Bool("ti")
-        memorylimit := context.String("m")
+/*        memorylimit := context.String("m")
         cpuset := context.String("cpuset")
         cpushare := context.String("cpushare")
         fmt.Println("context args memory: ", memorylimit)
@@ -56,6 +57,8 @@ var runCommand = cli.Command{
             CpuShare: cpushare,
         }
         RunCmd(tty, cmdArray, resConf)
+*/  
+        Run(tty, cmdArray)        
         return nil
     },
 }
