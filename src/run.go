@@ -25,6 +25,9 @@ func Run(tty bool, comArray []string) {
 
     sendInitCommand(comArray, writePipe)
     parent.Wait()
+    rootURL := "/root/"
+    mntURL := "/root/mnt/"
+    container.DeleteWorkSpace(rootURL, mntURL)
     os.Exit(0)
 }
 

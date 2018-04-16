@@ -112,3 +112,28 @@ func PathExists(path string) (bool, error) {
 
     return false, err
 }
+
+
+func DeleteWorkSpace(rootURL string, mntURL string) {
+    DeleteMountPoint(mntURL)
+    DeleteWriteLayer(rootURL)
+}
+
+func DeleteMountPoint(mntURL string) {
+    cmd := exec.Command("umount", mntURL)
+    cmd.Stdout=os.Stdout
+    cmd.Stderr=os.Stderr
+    if err := cmd.Run(); err != nil {
+        log.Errorf("Remove dir %s error %v", mntURL)
+    }
+    if err := os.RemoveAll(mntURL); err != nil {
+        log.Errorf("Remove dir %s error %v", mntURL, err)
+    }
+}
+
+func DeleteWriteLayer(rootURL string) {
+    writeURL := rootURL + "writeLayer/"
+    if err := os.RemoveAll(writeURL); err != nil {
+        log.Errorf("Remove dir %s error %v", writeURL, err)
+    }
+}
