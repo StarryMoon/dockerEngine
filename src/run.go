@@ -10,7 +10,7 @@ import (
 )
 
 func Run(tty bool, comArray []string, volume string) {
-    parent, writePipe := container.NewParentProcess(tty)
+    parent, writePipe := container.NewParentProcess(tty, volume)
     if parent == nil {
         log.Errorf("New parent process error")
         return
@@ -27,7 +27,7 @@ func Run(tty bool, comArray []string, volume string) {
     parent.Wait()
     rootURL := "/root/"
     mntURL := "/root/mnt/"
-    container.DeleteWorkSpace(rootURL, mntURL)
+    container.DeleteWorkSpace(rootURL, mntURL, volume)
     os.Exit(0)
 }
 

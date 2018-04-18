@@ -5,9 +5,10 @@ import (
     "os/exec"
     "os"
     log "github.com/Sirupsen/logrus"
+    "strings"
 )
 
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
     readPipe, writePipe, err := NewPipe()
     if err != nil {
         log.Errorf("New pipe error %v", err)
@@ -47,10 +48,11 @@ func NewPipe() (*os.File, *os.File, error) {
     return read, write, nil
 }
 
-func NewWorkSpace(rootURL string, mntURL string) {
+func NewWorkSpace(rootURL string, mntURL string, volume string) {
     CreateReadOnlyLayer(rootURL)
     CreateWriteLayer(rootURL)
     CreateMountPoint(rootURL, mntURL)
+    MountVolume(mntURL, volume)
 }
 
 
@@ -113,8 +115,48 @@ func PathExists(path string) (bool, error) {
     return false, err
 }
 
+func MountVolume(mntURL string, volume string) {
+    if (volume != "") {
+        volumeURLs := volumeUrlExtract(volume)
+        length := len(volumeURLs)
+        if (length == 2 && volumeURLs[0] != "" &7 volumeURLs[1] != "") {
+            StartMountVolume( mntURL, volumeURLs)
+            log.Infof("%q", volumeURLs)
+        }else {
+            log.Infof("Volume parameter input is not correct.")
+        }
+    }
+}
 
-func DeleteWorkSpace(rootURL string, mntURL string) {
+func volumeUrlExtract(volume string) ([]string) {
+    var volumeURLs []string
+    volumeURLs = strings.split(volume, ":")
+    return volumeURLs
+}
+
+func StartMountVolume( mntURL, volumeURLS) {
+    parentUrl := volumeURLs[0]
+    if err := os.Mkdir(parentUrl, 0777); err != nil {
+        log.Infof("Mkdir parent dir %s error. %v", parentUrl, err)
+    }
+
+    containerUrl := volumeURLs[1]
+    containerVolumeURL := mntURL + containerUrl
+    if err := os.Mkdir(containerVolumeURL, 0777); err != nil {
+        log.Infof("Mkdir container dir %s error %v", containerVolumeURL, err)
+    }
+
+    dirs := "dirs=" + parentUrl
+    cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", containerVolumeURL)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    if err := cmd.Run(); err!= nil {
+        log.Errorf("Mount volume failed. %v", err)
+    }
+}
+
+
+func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
     DeleteMountPoint(mntURL)
     DeleteWriteLayer(rootURL)
 }
