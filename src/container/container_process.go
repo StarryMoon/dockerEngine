@@ -34,7 +34,7 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
     //specify the foot file system
     mntURL := "/root/mnt/"
     rootURL := "/root/"
-    NewWorkSpace(rootURL, mntURL)
+    NewWorkSpace(rootURL, mntURL, volume)
     cmd.Dir = mntURL
 
     return cmd, writePipe
@@ -119,7 +119,7 @@ func MountVolume(mntURL string, volume string) {
     if (volume != "") {
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
-        if (length == 2 && volumeURLs[0] != "" &7 volumeURLs[1] != "") {
+        if (length == 2 && volumeURLs[0] != "" && volumeURLs[1] != "") {
             StartMountVolume( mntURL, volumeURLs)
             log.Infof("%q", volumeURLs)
         }else {
@@ -130,11 +130,11 @@ func MountVolume(mntURL string, volume string) {
 
 func volumeUrlExtract(volume string) ([]string) {
     var volumeURLs []string
-    volumeURLs = strings.split(volume, ":")
+    volumeURLs = strings.Split(volume, ":")
     return volumeURLs
 }
 
-func StartMountVolume( mntURL, volumeURLS) {
+func StartMountVolume(mntURL string, volumeURLs []string) {
     parentUrl := volumeURLs[0]
     if err := os.Mkdir(parentUrl, 0777); err != nil {
         log.Infof("Mkdir parent dir %s error. %v", parentUrl, err)
@@ -157,8 +157,25 @@ func StartMountVolume( mntURL, volumeURLS) {
 
 
 func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
+    if (volume != "") {
+        volumeURLs := volumeUrlExtract(volume)
+        length := len(volumeURLs)
+        if (length == 2 && volumeURLs[0]!= "" && volumeURLs[1]!= "") {
+            DeleteVolume(mntURL, volumeURLs)
+        }
+    }
     DeleteMountPoint(mntURL)
     DeleteWriteLayer(rootURL)
+}
+
+func DeleteVolume(mntURL string, volumeURLs []string) {
+    containerUrl := mntURL + volumeURLs[1]
+    cmd := exec.Command("umount", containerUrl)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    if err := cmd.Run(); err != nil {
+        log.Errorf("Umount volume failed. %v", err)
+    }
 }
 
 func DeleteMountPoint(mntURL string) {

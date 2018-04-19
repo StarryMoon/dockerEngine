@@ -32,7 +32,7 @@ var runCommand = cli.Command{
 */        
         cli.StringFlag{
             Name: "v",
-            Usage: "volume"
+            Usage: "volume",
         },
     },
     Action: func(context *cli.Context) error {
@@ -49,7 +49,7 @@ var runCommand = cli.Command{
         fmt.Println("context args Get(0) : ", context.Args().Get(0))
         fmt.Println("context args : ", cmdArray)
         tty := context.Bool("ti")
-        volume := context.Bool("v")
+        volume := context.String("v")
 
 /*        memorylimit := context.String("m")
         cpuset := context.String("cpuset")
@@ -64,7 +64,7 @@ var runCommand = cli.Command{
         }
         RunCmd(tty, cmdArray, resConf)
 */  
-        Run(tty, cmdArrayi, volume)        
+        Run(tty, cmdArray, volume)        
         return nil
     },
 }
