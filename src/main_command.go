@@ -81,3 +81,19 @@ var initCommand = cli.Command{
         return err
     }, 
 }
+
+var commitCommand = cli.Command{
+    Name: "commit",
+    Usage: "Commit a container into one image",
+    Action: func(context *cli.Context) error {
+        log.Infof("commit come on")
+        if len(context.Args())<1 {
+            return fmt.Errorf("Missing container name")
+        }
+
+        //the default container is running in /root/mnt
+        imageName := context.Args().Get(0)
+        commitContainer(imageName)
+        return nil
+    }
+}

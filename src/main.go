@@ -15,9 +15,11 @@ func main() {
     app.Name = "dockerEngine"
     app.Usage = usage
 
+    //the command of cmd line
     app.Commands = []cli.Command{
         initCommand,  
         runCommand,
+        commitCommand,
     }
 
     app.Before = func(context *cli.Context) error {
