@@ -95,5 +95,5 @@ var commitCommand = cli.Command{
         imageName := context.Args().Get(0)
         commitContainer(imageName)
         return nil
-    }
+    },
 }
