@@ -9,7 +9,7 @@ import (
     log "github.com/Sirupsen/logrus"
 )
 
-func Run(tty bool, comArray []string, volume string) {
+func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string) {
     parent, writePipe := container.NewParentProcess(tty, volume)
     if parent == nil {
         log.Errorf("New parent process error")
@@ -19,12 +19,23 @@ func Run(tty bool, comArray []string, volume string) {
         log.Error(err)
     }
     
-    /* Don't support cgroup arguments in cmd line
+    /* Do support cgroup arguments in cmd line
      *
     */
 
+    // create cgroup
+    cgroupManager := cgroups.NewCgroupManager("dockerEngine-cgroup")
+    defer cgroupManager.Destory()
+    cgroupManager.Set(res)
+    cgroupManager.Apply(parent.Process.Pid)
+
     sendInitCommand(comArray, writePipe)
-    parent.Wait()
+
+    // the parent process will wait the child process
+    if tty {
+        parent.Wait()
+    }
+
     rootURL := "/root/"
     mntURL := "/root/mnt/"
     container.DeleteWorkSpace(rootURL, mntURL, volume)

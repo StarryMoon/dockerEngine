@@ -17,7 +17,7 @@ var runCommand = cli.Command{
             Name: "ti",
             Usage: "enable tty",
         },
-/*        cli.StringFlag{
+        cli.StringFlag{
             Name: "m",
             Usage: "memory limit",
         },
@@ -29,7 +29,10 @@ var runCommand = cli.Command{
             Name: "cpuset",
             Usage: "cpuset limit",
         },
-*/        
+        cli.BoolFlag{
+            Name: "d",
+            Usage: "detach container"
+        }, 
         cli.StringFlag{
             Name: "v",
             Usage: "volume",
@@ -41,6 +44,8 @@ var runCommand = cli.Command{
         }
 //        cmd := context.Args().Get(0)
         fmt.Println("context args : ", context.Args())
+
+        // user command
         var cmdArray []string
         for _, arg := range context.Args() {
             cmdArray = append(cmdArray, arg)
@@ -48,10 +53,16 @@ var runCommand = cli.Command{
         }
         fmt.Println("context args Get(0) : ", context.Args().Get(0))
         fmt.Println("context args : ", cmdArray)
+
+
         tty := context.Bool("ti")
         volume := context.String("v")
+        detach := context.Bool("d")
+        if tty && detach {
+            fmt.Errorf("ti and d parameter can not be both used.")
+        }
 
-/*        memorylimit := context.String("m")
+        memorylimit := context.String("m")
         cpuset := context.String("cpuset")
         cpushare := context.String("cpushare")
         fmt.Println("context args memory: ", memorylimit)
@@ -62,9 +73,10 @@ var runCommand = cli.Command{
             CpuSet: cpuset,
             CpuShare: cpushare,
         }
-        RunCmd(tty, cmdArray, resConf)
-*/  
-        Run(tty, cmdArray, volume)        
+//        RunCmd(tty, cmdArray, resConf)
+//        Run(tty, cmdArray, volume)
+
+          Run(tty, cmdArray,resconf, volume)
         return nil
     },
 }
