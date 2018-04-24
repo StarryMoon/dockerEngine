@@ -8,6 +8,23 @@ import (
     "strings"
 )
 
+type ContainerInfo struct {
+    Pid        string `json:"pid"`           //容器的Init进程在主机上的PID
+    Id         string `json:"id"`            //容器ID
+    Name       string `json:"name"`          //容器名
+    Command    string `json:"command"`       //容器内init进程的运行命令
+    CreateTime string `json:"createTime"`    //容器创建时间
+    Status     string `json:"status"`        //容器的状态
+}
+
+var (
+    RUNNING                     string = "running"
+    STOP                        string = "stopped"
+    EXIT                        string = "exited"
+    DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"
+    ConfigName                  string = "config.json"
+)
+
 func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
     readPipe, writePipe, err := NewPipe()
     if err != nil {

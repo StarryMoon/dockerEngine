@@ -5,7 +5,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/urfave/cli"
     "dockerEngine/src/container"
-//    "dockerEngine/src/cgroups/subsystems"
+    "dockerEngine/src/cgroups/subsystems"
 //    "dockerEngine/src/cgroups"
 )
 
@@ -31,11 +31,15 @@ var runCommand = cli.Command{
         },
         cli.BoolFlag{
             Name: "d",
-            Usage: "detach container"
+            Usage: "detach container",
         }, 
         cli.StringFlag{
             Name: "v",
             Usage: "volume",
+        },
+        cli.StringFlag{
+            Name: "name",
+            Usage: "container name",
         },
     },
     Action: func(context *cli.Context) error {
@@ -62,6 +66,8 @@ var runCommand = cli.Command{
             fmt.Errorf("ti and d parameter can not be both used.")
         }
 
+        containerName := context.String("name")
+
         memorylimit := context.String("m")
         cpuset := context.String("cpuset")
         cpushare := context.String("cpushare")
@@ -76,7 +82,7 @@ var runCommand = cli.Command{
 //        RunCmd(tty, cmdArray, resConf)
 //        Run(tty, cmdArray, volume)
 
-          Run(tty, cmdArray,resconf, volume)
+          Run(tty, cmdArray,i resConf, volume, containerName)
         return nil
     },
 }
