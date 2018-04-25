@@ -21,7 +21,7 @@ var (
     RUNNING                     string = "running"
     STOP                        string = "stopped"
     EXIT                        string = "exited"
-    DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"
+    DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"    //用于输出参数 fmt.Printf
     ConfigName                  string = "config.json"
 )
 

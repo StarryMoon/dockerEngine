@@ -82,7 +82,7 @@ var runCommand = cli.Command{
 //        RunCmd(tty, cmdArray, resConf)
 //        Run(tty, cmdArray, volume)
 
-          Run(tty, cmdArray,i resConf, volume, containerName)
+          Run(tty, cmdArray, resConf, volume, containerName)
         return nil
     },
 }
