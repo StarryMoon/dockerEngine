@@ -3,14 +3,18 @@ package main
 import (
     log "github.com/Sirupsen/logrus"
     "fmt"
-    "os/exec"
+    "os"
+    "io/ioutil"
+    "encoding/json"
+    "text/tabwriter"
+//    "os/exec"
     "dockerEngine/src/container"
 )
 
-func listContainer() {
+func listContainers() {
     dirUrl := fmt.Sprintf(container.DefaultInfoLocation, "")  //string
     fmt.Println("list container info path : %s", dirUrl)
-    dirUrl := dirUrl[:len(dirUrl)]   //???
+    dirUrl = dirUrl[:len(dirUrl)]   //???
 
     files, err := ioutil.ReadDir(dirUrl)    // []os.FileInfo
     if err != nil {
@@ -58,11 +62,11 @@ func getContainerInfo(file os.FileInfo) (*container.ContainerInfo, error) {
         return nil, err
     }
 
-    var containerInfo containerInfo
+    var containerInfo container.ContainerInfo
     if err := json.Unmarshal(content, &containerInfo); err != nil {
         log.Errorf("Json unmarshal error %v", err)
         return nil, err
     }
 
-    retrun &containerInfo, nil
+    return &containerInfo, nil
 }

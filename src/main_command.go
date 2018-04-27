@@ -120,7 +120,7 @@ var listCommand = cli.Command{
     Name: "ps",
     Usage: "list all the containers",
     Action: func(context *cli.Context) error {
-        ListContainers()
+        listContainers()
         return nil
     },
 }
