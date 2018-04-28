@@ -23,6 +23,7 @@ var (
     EXIT                        string = "exited"
     DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"    //用于输出参数 fmt.Printf
     ConfigName                  string = "config.json"
+    ContaienrLogFile            string = "container.log"
 )
 
 func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
@@ -42,7 +43,21 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
         cmd.Stdin = os.Stdin
         cmd.Stdout = os.Stdout
         cmd.Stderr = os.Stderr
-    }
+    } else {
+          dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
+          if err := os.MkdirAll(dirUrl, 0622); err != nil {
+              log.Errorf("NewParentProcess mkdir %s error %v", dirUrl, err)
+              return nil, nil
+          }
+
+          stdLogFilePath := dirUrl + ContainerLogFile
+          stdLogFile, err := os.Create(stdLogFilePath)
+          if err != nil {
+              log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
+              return nil, nil
+          }
+          cmd.Stdout = stdLogFile
+      }
     
     cmd.ExtraFiles = []*os.File{readPipe}
 
