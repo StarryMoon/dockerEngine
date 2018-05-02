@@ -15,7 +15,12 @@ import (
 )
 
 func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string, containerName string) {
-    parent, writePipe := container.NewParentProcess(tty, volume)
+    id := randContainerIdGenerator()
+    if containerName == "" {
+        containerName = id
+    }
+
+    parent, writePipe := container.NewParentProcess(tty, volume, containerName)
     if parent == nil {
         log.Errorf("New parent process error")
         return
@@ -84,15 +89,15 @@ func sendInitCommand(cmdArray []string, writePipe *os.File) {
 }
 
 func recordContainerInfo(containerPID int, commandArray []string, containerName string) (string, error) {
-    id := randContainerIdGenerator()
+   // id := randContainerIdGenerator()
     createTime := time.Now().Format("2006-01-02 15:04:05")
     command := strings.Join(commandArray, "")
-    if containerName == "" {
-        containerName = id
-    }
+   // if containerName == "" {
+   //     containerName = id
+   // }
 
     containerInfo := &container.ContainerInfo{
-        Id:              id,
+        Id:              containerName,                 //id,
         Pid:             strconv.Itoa(containerPID),    //类型转换  int-->string
         Command:         command,
         CreateTime:      createTime,
@@ -135,7 +140,7 @@ func recordContainerInfo(containerPID int, commandArray []string, containerName 
         return "", err
     }
 
-    //maybe containerName is equal to rand id
+    
     return containerName, nil
 }
 

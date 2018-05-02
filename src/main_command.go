@@ -130,10 +130,10 @@ var logCommand = cli.Command{
     Usage: "print logs of a container",
     Action: func(context *cli.Context) error {
         if len(context.Args()) <1 {
-            retrun fmt.Errorf("Please input your container name")
+            return fmt.Errorf("Please input your container name")
         }
         containerName := context.Args().Get(0)
         logContainer(containerName)
         return nil
-    }
+    },
 }

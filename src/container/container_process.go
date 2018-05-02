@@ -6,6 +6,7 @@ import (
     "os"
     log "github.com/Sirupsen/logrus"
     "strings"
+    "fmt"
 )
 
 type ContainerInfo struct {
@@ -23,10 +24,10 @@ var (
     EXIT                        string = "exited"
     DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"    //用于输出参数 fmt.Printf
     ConfigName                  string = "config.json"
-    ContaienrLogFile            string = "container.log"
+    ContainerLogFile            string = "container.log"
 )
 
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
     readPipe, writePipe, err := NewPipe()
     if err != nil {
         log.Errorf("New pipe error %v", err)
