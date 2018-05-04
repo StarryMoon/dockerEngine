@@ -29,7 +29,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
         log.Error(err)
     }
    
-    containerName, err := recordContainerInfo(parent.Process.Pid, comArray, containerName)
+    containerName, err := recordContainerInfo(parent.Process.Pid, comArray, containerName, id)
     if err != nil {
         log.Errorf("Record container info error %v", err)
         return
@@ -88,7 +88,7 @@ func sendInitCommand(cmdArray []string, writePipe *os.File) {
     writePipe.Close()
 }
 
-func recordContainerInfo(containerPID int, commandArray []string, containerName string) (string, error) {
+func recordContainerInfo(containerPID int, commandArray []string, containerName string, containerId string) (string, error) {
    // id := randContainerIdGenerator()
     createTime := time.Now().Format("2006-01-02 15:04:05")
     command := strings.Join(commandArray, "")
@@ -97,7 +97,7 @@ func recordContainerInfo(containerPID int, commandArray []string, containerName 
    // }
 
     containerInfo := &container.ContainerInfo{
-        Id:              containerName,                 //id,
+        Id:              containerId,                 //id,
         Pid:             strconv.Itoa(containerPID),    //类型转换  int-->string
         Command:         command,
         CreateTime:      createTime,
