@@ -137,3 +137,34 @@ var logCommand = cli.Command{
         return nil
     },
 }
+
+
+// first : to analyze the containerName and cmd
+// second: to find out the correspondingly pid
+// third : to set up envirnment varibles
+// fourth: to execute the "exec" again
+// fifth : to trigger the "setns"
+// ***note: environment varibles is a threshold, if it is set, the exec will not be executed again; and the content of "exec" is really executed by the "setns"
+var execCommand = cli.Command{
+    Name: "exec",
+    Usage: "exec a command into container",
+    Action: func(context *cli.Context) error {
+        if os.Getenv(ENV_EXEC_CMD) != "" {    //if true, execute the cmd directly, not to create the environment again
+            log.Infof("pid callback pid %s", os.Getpid())
+            return nil
+        }
+
+        if len(context.Args()) < 2 {
+            return fmt.Errorf("Missing container name or command")
+        }
+
+        containerName := context.Args().Get(0)
+        var commandArray []string
+        for _, arg := range context.Args().Tail() {
+            commandArray = append(commandArray, arg)
+        }
+
+        ExecContainer(containerName, commandArray)
+        return nil
+    }
+}
