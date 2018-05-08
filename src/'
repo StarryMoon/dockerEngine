@@ -19,8 +19,4 @@ func ExecContainer(icontainerName string, comArray []string) {
     }
 
     cmdStr := string.Join(comArray, " ")
-    log.Infof("container pid %s", pid)
-    log.Infof("command %s", cmdStr)
-
-
 }
