@@ -160,7 +160,7 @@ var execCommand = cli.Command{
 
         containerName := context.Args().Get(0)
         var commandArray []string
-        for _, arg := range context.Args().Tail() {
+        for _, arg := range context.Args().Tail() { //except the first element
             commandArray = append(commandArray, arg)
         }
 
