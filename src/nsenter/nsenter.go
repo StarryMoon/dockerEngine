@@ -45,7 +45,7 @@ __attribute__((constructor)) void enter_namespace(void) {
     }
 
     int res = system(dockerEngine_cmd);
-    exit(0)
+    exit(0);
     return;
 }
 */
