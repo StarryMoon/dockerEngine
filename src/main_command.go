@@ -181,3 +181,17 @@ var stopCommand = cli.Command{
         return nil
     },
 }
+
+var deleteCommand = cli.Command{
+    Name: "rm",
+    Usage: "remove specified container",
+    Action: func(context *cli.Context) error {
+        if len(context.Args()) < 1 {
+            return fmt.Errorf("Missing container name")
+        }
+
+        containerName := context.Args().Get(0)
+        deleteContainer(containerName)
+        return nil
+    },
+}
