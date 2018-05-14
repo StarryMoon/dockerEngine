@@ -15,7 +15,7 @@ import (
 const ENV_EXEC_PID = "dockerEngine_pid"
 const ENV_EXEC_CMD = "dockerEngine_cmd"
 
-func ExecContainer(containerName string, comArray []string) {
+func execContainer(containerName string, comArray []string) {
     pid, err := getContainerPidByName(containerName)
     if err != nil {
         log.Errorf("Exec container getContainerPidByName %s error %v", containerName, err)
