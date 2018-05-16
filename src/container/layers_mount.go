@@ -9,82 +9,11 @@ import (
     "fmt"
 )
 
-type ContainerInfo struct {
-    Pid        string `json:"pid"`           //容器的Init进程在主机上的PID
-    Id         string `json:"id"`            //容器ID
-    Name       string `json:"name"`          //容器名
-    Command    string `json:"command"`       //容器内init进程的运行命令
-    CreateTime string `json:"createTime"`    //容器创建时间
-    Status     string `json:"status"`        //容器的状态
-    Image      string `json:"imageName"`     //镜像名
-    Volume     string `json:"volume"`        //卷的路径
-}
+/* ReadOnlyLayer + imageName
+ * WriteLayer + containerName
+ * MountLayer + containerName + containerURL
+ */
 
-var (
-    RUNNING                     string = "running"
-    STOP                        string = "stopped"
-    EXIT                        string = "exited"
-    DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"    //用于输出参数 fmt.Printf
-    ConfigName                  string = "config.json"
-    ContainerLogFile            string = "container.log"
-)
-
-func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
-    readPipe, writePipe, err := NewPipe()
-    if err != nil {
-        log.Errorf("New pipe error %v", err)
-        return nil, nil
-    }
-//    args := []string{"init", command}
-//    cmd := exec.Command("/proc/self/exe", args...)
-    cmd := exec.Command("/proc/self/exe","init")
-    cmd.SysProcAttr = &syscall.SysProcAttr{
-        Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID,
-    }
-
-    if tty {
-        cmd.Stdin = os.Stdin
-        cmd.Stdout = os.Stdout
-        cmd.Stderr = os.Stderr
-    } else {
-          dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
-          if err := os.MkdirAll(dirUrl, 0622); err != nil {
-              log.Errorf("NewParentProcess mkdir %s error %v", dirUrl, err)
-              return nil, nil
-          }
-
-          stdLogFilePath := dirUrl + ContainerLogFile
-          stdLogFile, err := os.Create(stdLogFilePath)
-          if err != nil {
-              log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
-              return nil, nil
-          }
-          cmd.Stdout = stdLogFile
-      }
-    
-    cmd.ExtraFiles = []*os.File{readPipe}
-
-    //cmd.Dir = "/root/busybox"
-    
-    //specify the foot file system
-    mntURL := "/root/mnt/"
-    rootURL := "/root/"
-    NewWorkSpace(rootURL, mntURL, volume)
-    cmd.Dir = mntURL
-
-    return cmd, writePipe
-}
-
-func NewPipe() (*os.File, *os.File, error) {
-    read, write, err := os.Pipe()
-    if err != nil {
-        return nil, nil, nil 
-    }
-    return read, write, nil
-}
-
-
-/*
 func NewWorkSpace(rootURL string, mntURL string, volume string) {
     CreateReadOnlyLayer(rootURL)
     CreateWriteLayer(rootURL)
@@ -193,7 +122,8 @@ func StartMountVolume(mntURL string, volumeURLs []string) {
 }
 
 
-func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
+//func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
+func DeleteWorkSpace(volume string, imageName string, containerName string) {
     if (volume != "") {
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
@@ -233,5 +163,3 @@ func DeleteWriteLayer(rootURL string) {
         log.Errorf("Remove dir %s error %v", writeURL, err)
     }
 }
-
-*/

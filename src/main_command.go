@@ -14,7 +14,7 @@ var runCommand = cli.Command{
     Usage: "Create a container with namespace and cgroups limit dockerEngine run -ti [command]",
     Flags: []cli.Flag{
         cli.BoolFlag{
-            Name: "ti",
+            Name: "t",
             Usage: "enable tty",
         },
         cli.StringFlag{
@@ -41,6 +41,10 @@ var runCommand = cli.Command{
             Name: "name",
             Usage: "container name",
         },
+        cli.StringFlag{
+            Name: "i",
+            Usage: "image name",
+        },
     },
     Action: func(context *cli.Context) error {
         if len(context.Args()) < 1 {
@@ -59,7 +63,7 @@ var runCommand = cli.Command{
         fmt.Println("context args : ", cmdArray)
 
 
-        tty := context.Bool("ti")
+        tty := context.Bool("t")
         volume := context.String("v")
         detach := context.Bool("d")
         if tty && detach {
@@ -67,6 +71,7 @@ var runCommand = cli.Command{
         }
 
         containerName := context.String("name")
+        imageName := context.String("i")
 
         memorylimit := context.String("m")
         cpuset := context.String("cpuset")
@@ -82,7 +87,7 @@ var runCommand = cli.Command{
 //        RunCmd(tty, cmdArray, resConf)
 //        Run(tty, cmdArray, volume)
 
-          Run(tty, cmdArray, resConf, volume, containerName)
+          Run(tty, cmdArray, resConf, volume, containerName, imageName)
         return nil
     },
 }
