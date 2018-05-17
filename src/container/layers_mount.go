@@ -14,11 +14,11 @@ import (
  * MountLayer + containerName + containerURL
  */
 
-func NewWorkSpace(rootURL string, mntURL string, volume string) {
-    CreateReadOnlyLayer(rootURL)
-    CreateWriteLayer(rootURL)
-    CreateMountPoint(rootURL, mntURL)
-    MountVolume(mntURL, volume)
+func NewWorkSpace(volume string, containerName string, imageName string) {
+    CreateReadOnlyLayer(imageName)
+    CreateWriteLayer(containerName)
+    CreateMountPoint(containerName, imageName)
+    MountVolume(volume, containerName)
 }
 
 
@@ -81,12 +81,13 @@ func PathExists(path string) (bool, error) {
     return false, err
 }
 
-func MountVolume(mntURL string, volume string) {
+func MountVolume(volume string, contianerName string) {
     if (volume != "") {
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
         if (length == 2 && volumeURLs[0] != "" && volumeURLs[1] != "") {
-            StartMountVolume( mntURL, volumeURLs)
+            mntURL := fmt.Sprintf(MntUrl, containerName)
+            StartMountVolume(mntURL, volumeURLs)
             log.Infof("%q", volumeURLs)
         }else {
             log.Infof("Volume parameter input is not correct.")

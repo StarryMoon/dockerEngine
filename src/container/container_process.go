@@ -27,9 +27,12 @@ var (
     DefaultInfoLocation         string = "/var/run/dockerEngine/%s/"    //用于输出参数 fmt.Printf
     ConfigName                  string = "config.json"
     ContainerLogFile            string = "container.log"
+    RootUrl                     string = "/root"
+    MntUrl                      string = "/root/mnt/%s"
+    WriteLayerUrl               string = "/root/writeLayer/%s"
 )
 
-func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName string, imageName string) (*exec.Cmd, *os.File) {
     readPipe, writePipe, err := NewPipe()
     if err != nil {
         log.Errorf("New pipe error %v", err)
@@ -67,10 +70,12 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
     //cmd.Dir = "/root/busybox"
     
     //specify the foot file system
-    mntURL := "/root/mnt/"
-    rootURL := "/root/"
-    NewWorkSpace(rootURL, mntURL, volume)
-    cmd.Dir = mntURL
+    //mntURL := "/root/mnt/"
+    //rootURL := "/root/"
+    //NewWorkSpace(rootURL, mntURL, volume)
+    //cmd.Dir = mntURL
+    NewWorkSpace(volume, containerName, imageName)
+    cmd.Dir = fmt.Sprintf(MntUrl, containerName)
 
     return cmd, writePipe
 }
