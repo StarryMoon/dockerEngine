@@ -9,9 +9,9 @@ import (
     "fmt"
 )
 
-/* ReadOnlyLayer + imageName
- * WriteLayer + containerName
- * MountLayer + containerName + containerURL
+/* ReadOnlyLayer: RootUrl + imageName
+ * WriteLayer: WriteLayerUrl + containerName
+ * MountLayer: MntUrl + containerName + containerURL
  */
 
 func NewWorkSpace(volume string, containerName string, imageName string) {
@@ -23,43 +23,46 @@ func NewWorkSpace(volume string, containerName string, imageName string) {
 
 
 //decompress the tar package of read only file system
-func CreateReadOnlyLayer(rootURL string) {
-    busyboxURL := rootURL + "busybox/"
-    busyboxTarURL := rootURL + "busybox.tar"
-    exist, err := PathExists(busyboxURL)
+func CreateReadOnlyLayer(imageName string) {
+    unTarFoldUrl := RootUrl + "/" + imageName + "/"
+    imageTarURL := RootUrl + "/" + imageName + ".tar"
+    exist, err := PathExists(unTarFoldUrl)
     if err != nil {
-        log.Infof("Fail to judge whether the directory %s exists. %v ", busyboxURL, err)
+        log.Infof("Fail to judge whether the directory %s exists. %v ", unTarFoldUrl, err)
     }
     
     if exist == false {
-        if err := os.Mkdir(busyboxURL, 0777); err != nil {
-            log.Errorf("Mkdir directory %s error.  %v", busyboxURL, err)
+        if err := os.Mkdir(unTarFoldUrl, 0777); err != nil {
+            log.Errorf("Mkdir directory %s error.  %v", unTarFoldUrl, err)
         }
 
-        if _, err := exec.Command("tar", "-xvf", busyboxTarURL, "-C", busyboxURL).CombinedOutput(); err != nil {
-            log.Errorf("unTar directory %s error %v", busyboxTarURL, err)
+        if _, err := exec.Command("tar", "-xvf", imageTarURL, "-C", unTarFoldUrl).CombinedOutput(); err != nil {
+            log.Errorf("unTar directory %s error %v", imageTarURL, err)
         }
     }
-
 }
 
 //create a read-write layer
-func CreateWriteLayer(rootURL string) {
-    writeURL := rootURL + "writeLayer/"
+func CreateWriteLayer(containerName string) {
+    writeURL := fmt.Sprintf(WriteLayerUrl, containerName)
     if err := os.Mkdir(writeURL, 0777); err != nil {
         log.Errorf("Mkdir directory %s error %v", writeURL, err)
     }
 }
 
 //mount rw layer and ro layer
-func CreateMountPoint(rootURL string, mntURL string) {
+func CreateMountPoint(containerName string, imageName string) {
     //create mnt mount point
-    if err := os.Mkdir(mntURL, 0777); err != nil {
+    mntUrl := fmt.Sprintf(MntUrl, containerName)
+    if err := os.Mkdir(mntUrl, 0777); err != nil {
         log.Errorf("Mkdir directory %s error %v", mntURL, err)
     }
 
     //"mount -t aufs -o dirs=/root/writeLayer:/root/busybox/ none /root/mnt"
-    dirs := "dirs=" + rootURL + "writeLayer:" + rootURL + "busybox"
+    tmpWriteLayerUrl := fmt.Sprintf(WriteLayerUrl, containerName)
+    tmpReadOnlyLayerUrl := RootUrl + "/" + imageName
+    dirs := "dirs=" + tmpWriteLayerUrl + ":" + tmpReadOnlyLayerUrl
+
     cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntURL)
     cmd.Stdout = os.Stdout
     cmd.Stderr = os.Stderr
@@ -124,20 +127,21 @@ func StartMountVolume(mntURL string, volumeURLs []string) {
 
 
 //func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
-func DeleteWorkSpace(volume string, imageName string, containerName string) {
+func DeleteWorkSpace(volume string, containerName string) {
     if (volume != "") {
         volumeURLs := volumeUrlExtract(volume)
+        mntURL := fmt.Sprintf(MntUrl, containerName)
         length := len(volumeURLs)
         if (length == 2 && volumeURLs[0]!= "" && volumeURLs[1]!= "") {
             DeleteVolume(mntURL, volumeURLs)
         }
     }
-    DeleteMountPoint(mntURL)
-    DeleteWriteLayer(rootURL)
+    DeleteMountPoint(containerName)
+    DeleteWriteLayer(containerName)
 }
 
 func DeleteVolume(mntURL string, volumeURLs []string) {
-    containerUrl := mntURL + volumeURLs[1]
+    containerUrl := mntURL + "/" + volumeURLs[1]
     cmd := exec.Command("umount", containerUrl)
     cmd.Stdout = os.Stdout
     cmd.Stderr = os.Stderr
@@ -146,20 +150,22 @@ func DeleteVolume(mntURL string, volumeURLs []string) {
     }
 }
 
-func DeleteMountPoint(mntURL string) {
+func DeleteMountPoint(containerName string) {
+    mntURL := fmt.Sprintf(MntUrl, containerName)
     cmd := exec.Command("umount", mntURL)
     cmd.Stdout=os.Stdout
     cmd.Stderr=os.Stderr
     if err := cmd.Run(); err != nil {
         log.Errorf("Remove dir %s error %v", mntURL)
     }
+    mntURL := fmt.Sprintf(MntUrl, containerName)
     if err := os.RemoveAll(mntURL); err != nil {
         log.Errorf("Remove dir %s error %v", mntURL, err)
     }
 }
 
-func DeleteWriteLayer(rootURL string) {
-    writeURL := rootURL + "writeLayer/"
+func DeleteWriteLayer(containerName string) {
+    writeURL := fmt.Sprintf(WriteLayerUrl, containerName)
     if err := os.RemoveAll(writeURL); err != nil {
         log.Errorf("Remove dir %s error %v", writeURL, err)
     }

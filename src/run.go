@@ -54,7 +54,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
 //        rootURL := "/root/"
 //        mntURL := "/root/mnt/"
 //        container.DeleteWorkSpace(rootURL, mntURL, volume, imageName)
-        container.DeleteWorkSpace(volume, imageName, containerName)
+        container.DeleteWorkSpace(volume, containerName)
         os.Exit(0)
     }
 }
