@@ -1,7 +1,7 @@
 package container
 
 import (
-    "syscall"
+//    "syscall"
     "os/exec"
     "os"
     log "github.com/Sirupsen/logrus"
@@ -17,7 +17,7 @@ import (
 func NewWorkSpace(volume string, containerName string, imageName string) {
     CreateReadOnlyLayer(imageName)
     CreateWriteLayer(containerName)
-    CreateMountPoint(containerName, imageName)
+    StartMountLayers(containerName, imageName)
     MountVolume(volume, containerName)
 }
 
@@ -51,10 +51,10 @@ func CreateWriteLayer(containerName string) {
 }
 
 //mount rw layer and ro layer
-func CreateMountPoint(containerName string, imageName string) {
+func StartMountLayers(containerName string, imageName string) {
     //create mnt mount point
-    mntUrl := fmt.Sprintf(MntUrl, containerName)
-    if err := os.Mkdir(mntUrl, 0777); err != nil {
+    mntURL := fmt.Sprintf(MntUrl, containerName)
+    if err := os.Mkdir(mntURL, 0777); err != nil {
         log.Errorf("Mkdir directory %s error %v", mntURL, err)
     }
 
@@ -84,7 +84,7 @@ func PathExists(path string) (bool, error) {
     return false, err
 }
 
-func MountVolume(volume string, contianerName string) {
+func MountVolume(volume string, containerName string) {
     if (volume != "") {
         volumeURLs := volumeUrlExtract(volume)
         length := len(volumeURLs)
@@ -158,7 +158,6 @@ func DeleteMountPoint(containerName string) {
     if err := cmd.Run(); err != nil {
         log.Errorf("Remove dir %s error %v", mntURL)
     }
-    mntURL := fmt.Sprintf(MntUrl, containerName)
     if err := os.RemoveAll(mntURL); err != nil {
         log.Errorf("Remove dir %s error %v", mntURL, err)
     }
