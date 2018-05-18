@@ -32,7 +32,7 @@ var (
     WriteLayerUrl               string = "/root/writeLayer/%s"
 )
 
-func NewParentProcess(tty bool, volume string, containerName string, imageName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName string, imageName string, envSlice []string) (*exec.Cmd, *os.File) {
     readPipe, writePipe, err := NewPipe()
     if err != nil {
         log.Errorf("New pipe error %v", err)
@@ -66,6 +66,7 @@ func NewParentProcess(tty bool, volume string, containerName string, imageName s
       }
     
     cmd.ExtraFiles = []*os.File{readPipe}
+    cmd.Env = append(os.Environ(), envSlice...)
 
     //cmd.Dir = "/root/busybox"
     
@@ -74,6 +75,7 @@ func NewParentProcess(tty bool, volume string, containerName string, imageName s
     //rootURL := "/root/"
     //NewWorkSpace(rootURL, mntURL, volume)
     //cmd.Dir = mntURL
+
     NewWorkSpace(volume, containerName, imageName)
     cmd.Dir = fmt.Sprintf(MntUrl, containerName)
 

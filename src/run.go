@@ -14,13 +14,13 @@ import (
     "strconv"
 )
 
-func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string, containerName string, imageName string) {
+func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string, containerName string, imageName string, envSlice []string) {
     id := randContainerIdGenerator()
     if containerName == "" {
         containerName = id
     }
 
-    parent, writePipe := container.NewParentProcess(tty, volume, containerName, imageName)
+    parent, writePipe := container.NewParentProcess(tty, volume, containerName, imageName, envSlice)
     if parent == nil {
         log.Errorf("New parent process error")
         return
