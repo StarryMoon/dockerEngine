@@ -54,18 +54,16 @@ var runCommand = cli.Command{
         if len(context.Args()) < 1 {
             return fmt.Errorf("Missing container command")
         }
-//        cmd := context.Args().Get(0)
-        fmt.Println("context args : ", context.Args())
 
+        fmt.Println("volume := ", context.String("v"))
         // user command
         var cmdArray []string
         for _, arg := range context.Args() {
             cmdArray = append(cmdArray, arg)
-            fmt.Println("cmdArray : ", cmdArray)
         }
-        fmt.Println("context args Get(0) : ", context.Args().Get(0))
         fmt.Println("context args : ", cmdArray)
-
+//              imageName := cmdArray[0]
+//              cmdArray = cmdArray[1:]
 
         tty := context.Bool("t")
         volume := context.String("v")
@@ -76,6 +74,8 @@ var runCommand = cli.Command{
 
         containerName := context.String("name")
         imageName := context.String("i")
+        fmt.Println("context args containerName: ", containerName)
+        fmt.Println("context args imageName: ", imageName)
 
         memorylimit := context.String("m")
         cpuset := context.String("cpuset")

@@ -45,7 +45,7 @@ func CreateReadOnlyLayer(imageName string) {
 //create a read-write layer
 func CreateWriteLayer(containerName string) {
     writeURL := fmt.Sprintf(WriteLayerUrl, containerName)
-    if err := os.Mkdir(writeURL, 0777); err != nil {
+    if err := os.MkdirAll(writeURL, 0777); err != nil {                  //multiple file dirs need to be created
         log.Errorf("Mkdir directory %s error %v", writeURL, err)
     }
 }
@@ -54,7 +54,7 @@ func CreateWriteLayer(containerName string) {
 func StartMountLayers(containerName string, imageName string) {
     //create mnt mount point
     mntURL := fmt.Sprintf(MntUrl, containerName)
-    if err := os.Mkdir(mntURL, 0777); err != nil {
+    if err := os.MkdirAll(mntURL, 0777); err != nil {                    //multiple file dirs need to be created
         log.Errorf("Mkdir directory %s error %v", mntURL, err)
     }
 
