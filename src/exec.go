@@ -34,11 +34,25 @@ func execContainer(containerName string, comArray []string) {
     os.Setenv(ENV_EXEC_PID, pid)
     os.Setenv(ENV_EXEC_CMD, cmdStr)
 
+    containerEnvs := getEnvByPid(pid)
+    cmd.Env = append(os.Environ(), containerEnvs...)
+
     if err := cmd.Run(); err != nil {
         log.Errorf("Exec container %s error %v", containerName, err)
     }
 }
 
+func getEnvByPid(pid string) []string {
+    path := fmt.Sprintf("/proc/%s/environ", pid)
+    contentBytes, err := ioutil.ReadFile(path)
+    if err != nil {
+        log.Errorf("Read file %s error %v", path, err)
+        return nil
+    }
+
+    envs := strings.Split(string(contentBytes), "\u00000")
+    return envs
+}
 
 func getContainerPidByName(containerName string) (string, error) {
     dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
