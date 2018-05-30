@@ -64,4 +64,40 @@ func (nw *Network) dump(dumpPath string) error {
         return err
     }
     defer nwFile.Close()
+
+    nwJson, err := json.Marshal(nw)
+    if err != nil {
+        logrus.Errorf("error: ", err)
+        return err
+    }
+
+    _, errr := nwFile.Write(nwJson)
+    if err != nil {
+        logrus.Errorf("error: ", err)
+        return err
+    }
+
+    return nil
+}
+
+func (nw *Network) load(dumpPath string) error {
+    nwConfigFile, err := os.Open(dumpPath)
+    defer nwConfigFile.Close()
+    if err != nil {
+        return err
+    }
+
+    nwJson := make([]byte, 2000)
+    n, err := nwConfigFile.Read(nwJson)
+    if err != nil {
+        return err
+    }
+
+    err = json.Unmarshal(nwJson[:n], nw)
+    if err != nil {
+        logrus.Errorf("Error load nw info", err)
+        return err
+    }
+
+    return nil
 }
