@@ -8,7 +8,7 @@ import (
     "dockerEngine/src/container"
 )
 
-type Network struct {
+type Subnet struct {            //建立子网
     Name string                 //网络名
     IpRange *net.IPNet          //地址段
     Driver string               //网络驱动
@@ -20,7 +20,7 @@ type Endpoint struct {
     IPAddress net.IP `json:"ip"`
     MacAddress net.HardwareAddr `json:"mac"`
     PortMapping []string `json:"portmapping"`
-    Network  *Network
+    Network  *Subnet
 }
 
 type NetworkDriver interface {
