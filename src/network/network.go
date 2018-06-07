@@ -10,6 +10,8 @@ import (
 
 var (
     defaultNetworkPath = "/var/run/dockerEngine/network/network/"
+    networks = map[string]*NetworkSeg{}
+    drivers = map[string]NetworkDriver{}
 )
 
 type NetworkSeg struct {            //建立子网
@@ -135,4 +137,83 @@ func Connect(networkName string, cinfo *container.ContainerInfo) error {
     }
 
     return configPortMapping(ep, cinfo)
+}
+
+func Init() error {
+    //加载网络驱动
+    var bridgeDriver = BridgeNetworkDriver()
+    drivers[bridgeDriver.Name()] = &bridgeDriver
+    if _, err := os.Stat(defaultNetworkPath); err != nil {
+        if os.IsNoExit(err) {
+            os.MkdirAll(defaultNetworkPath, 0644)
+        } else {
+            return err
+        }
+    }
+    
+    filepath.Walk(defaultNetworkPath, func(nwPath string, info os.FileInfo, err error) error {
+        //自动拼凑 nwPath = defaultNetworkPath + fileName
+        if info.IsDir() {
+            return nil
+        }
+
+        _, nwName := path.Split(nwPath)
+        nw := &Network{
+            Name: nwName,
+        }
+
+        if err := nw.load(nwPath); err != nil {
+            logrus.Errorf("error load network: %s", err)
+        }
+
+        networks[nwName] = nw
+        return nil
+    })
+    return nil
+}
+
+func ListNetwork() {
+    w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
+    fmt.Fprint(w, "NAME\tIPRange\tDriver\n")
+    for _, nw := range networks {
+        fmt.Fprintf(w, "%s\t%s\t%s\n",
+            nw.Name,
+            nw.IPRange.String(),
+            nw.Driver,
+        )
+    }
+
+    if err := w.Flush(); err != nil {
+        logrus.Errorf("Flush error %v", err)
+        return
+    }
+}
+
+func DeleteNetwork(networkName string) error {
+    nw, ok := networks[networkName]
+    if !ok {
+        return fmt.Errorf("No such network: %s", networkName)
+    }
+
+    if err := ipAllocator.Release(nw.IPRange, &nw.IPRange.IP); err != nil {
+        retrun fmt.Errorf("Error Remove Network gateway ip: %s", err)
+    }
+
+    if err := drivers[nw.Driver].Delete(*nw); err != nil {
+        retrun fmt.Errorf("Error Remove Network DriveError: %s", err)
+    }
+
+    return nw.remove(defaultNetworkPath)
+}
+
+func (nw *Network) remove(dumpPath string) error {
+    if _, err := os.Stat(path.Join(dumpPath, nw.Name)); err != nil {
+        if os.IsNoExist(err) {
+             return nil
+        } else {
+            return err 
+        }
+    } else {
+        return  os.Remove(path.Join(dumpPath, nw.Name))
+    }
 }
