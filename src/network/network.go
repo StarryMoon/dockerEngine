@@ -8,27 +8,31 @@ import (
     "dockerEngine/src/container"
 )
 
-type Subnet struct {            //建立子网
+var (
+    defaultNetworkPath = "/var/run/dockerEngine/network/network/"
+)
+
+type NetworkSeg struct {            //建立子网
     Name string                 //网络名
     IpRange *net.IPNet          //地址段
     Driver string               //网络驱动
 }
 
-type Endpoint struct {
+type Endpoint struct {         //veth
     ID string `json:"id"`
     Device netlink.Veth `json:"dev"`
     IPAddress net.IP `json:"ip"`
     MacAddress net.HardwareAddr `json:"mac"`
     PortMapping []string `json:"portmapping"`
-    Network  *Subnet
+    Network  *NetworkSeg
 }
 
 type NetworkDriver interface {
     Name() string
-    Create(subnet string, name string) (*Network, error)
-    Delete(network Network) error
-    Connect(network *Network, endpoint *Endpoint) error
-    Disconnect(network Network, endpoint *Endpoint) error
+    Create(subnet string, name string) (*NetworkSeg, error)
+    Delete(network NetworkSeg) error
+    Connect(network *NetworkSeg, endpoint *Endpoint) error
+    Disconnect(network NetworkSeg, endpoint *Endpoint) error
 }
 
 func CreateNetwork(driver string, subnet string, name string) error {
@@ -48,7 +52,8 @@ func CreateNetwork(driver string, subnet string, name string) error {
     return nw.dump(defaultNetworkPath)
 }
 
-func (nw *Network) dump(dumpPath string) error {
+//保存网络信息
+func (nw *NetworkSeg) dump(dumpPath string) error {
     if _, err := os.Stat(dumpPath); err != nil {
         if os.IsNoExist(err) {
             os.MkdirAll(dumpPath, 0644)
@@ -80,7 +85,8 @@ func (nw *Network) dump(dumpPath string) error {
     return nil
 }
 
-func (nw *Network) load(dumpPath string) error {
+func (nw *NetworkSeg) load(dumpPath string) error {
+//    nwPath := path.join(dumpPath, nw.Name)
     nwConfigFile, err := os.Open(dumpPath)
     defer nwConfigFile.Close()
     if err != nil {
@@ -100,4 +106,33 @@ func (nw *Network) load(dumpPath string) error {
     }
 
     return nil
+}
+
+func Connect(networkName string, cinfo *container.ContainerInfo) error {
+    network, ok := networks[networkName]
+    if !ok {
+        return fmt.Errorf("No such network: %s", networkName)
+    }
+
+    ip, err := ipAllocator.Allocate(network.IPRange)
+    if err != nil {
+        return err
+    }
+
+    ep := &Endpoint{
+        ID: fmt.Sprintf("%s-%s", cinfo.Id, networkName),
+        IPAddress: ip,
+        Network: network,
+        PortMapping: cinfo.PortMapping,
+    }
+
+    if err = drivers[network.Driver].Connect(network, ep); err != nil {
+        return err
+    }
+
+    if err = configEndpointIpAddressAndRoute(ep, cinfo); err != nil {
+        return err
+    }
+
+    return configPortMapping(ep, cinfo)
 }

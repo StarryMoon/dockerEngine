@@ -18,6 +18,7 @@ type ContainerInfo struct {
     Status     string `json:"status"`        //容器的状态
     Image      string `json:"imageName"`     //镜像名
     Volume     string `json:"volume"`        //卷的路径
+    PortMapping []string `json:"portmapping"`  //端口映射
 }
 
 var (
