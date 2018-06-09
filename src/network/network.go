@@ -206,6 +206,7 @@ func DeleteNetwork(networkName string) error {
     return nw.remove(defaultNetworkPath)
 }
 
+//删除文件
 func (nw *Network) remove(dumpPath string) error {
     if _, err := os.Stat(path.Join(dumpPath, nw.Name)); err != nil {
         if os.IsNoExist(err) {
