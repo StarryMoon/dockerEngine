@@ -14,7 +14,7 @@ var (
     drivers = map[string]NetworkDriver{}
 )
 
-type NetworkSeg struct {            //建立子网
+type NetworkSeg struct {        //建立子网
     Name string                 //网络名
     IpRange *net.IPNet          //地址段
     Driver string               //网络驱动
